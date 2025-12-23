@@ -1,39 +1,54 @@
 use bevy::prelude::*;
 
-#[derive(Component)]
-struct Person;
-
-#[derive(Component)]
-struct Name(String);
-
-fn add_people(mut commands: Commands) {
-    commands.spawn((Person, Name("Elaina Proctor".to_string())));
-    commands.spawn((Person, Name("Renzo Hume".to_string())));
-    commands.spawn((Person, Name("Zayna Nieves".to_string())));
-}
-
-fn hello_world() {
-    println!("hello world!");
-}
-
-fn greet_people(query: Query<&Name, With<Person>>) {
-    for name in &query {
-        println!("hello {}!", name.0);
-    }
-}
-
-fn update_people(mut query: Query<&mut Name, With<Person>>) {
-    for mut name in & mut query { 
-        if name.0 == "Elaina Proctor" {
-            name.0 = "Elaina Hume".to_string();
-            break; // Done changing names so leave early
-        }
-    }
-}
-
 fn main() {
     App::new()
-        .add_systems(Startup, add_people)
-        .add_systems(Update, (hello_world,(update_people,greet_people).chain()))
+        .add_plugins(DefaultPlugins)
+        .add_systems(Startup, setup)
+        .add_systems(Update, move_player)
         .run();
+}
+
+#[derive(Component)]
+struct Player;
+
+fn setup(
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut commands: Commands,
+) {
+    commands.spawn(Camera2d);
+
+    commands.spawn((
+        Player,
+        Mesh2d(meshes.add(Circle::new(50.0))),
+        MeshMaterial2d(materials.add(Color::WHITE)),
+    ));
+}
+
+const MOVE_SPEED: f32 = 6.0;
+
+/// Query that returns transform components for player entities.
+fn move_player(
+    mut transforms: Query<&mut Transform, With<Player>>,
+    keys: Res<ButtonInput<KeyCode>>,
+) {
+    for mut transform in transforms.iter_mut() {
+        let mut direction = Vec3::ZERO;
+        if keys.pressed(KeyCode::KeyW) {
+            direction.y += 1.0;
+        }
+        if keys.pressed(KeyCode::KeyA) {
+            direction.x -= 1.0;
+        }
+        if keys.pressed(KeyCode::KeyS) {
+            direction.y -= 1.0;
+        }
+        if keys.pressed(KeyCode::KeyD) {
+            direction.x += 1.0;
+        }
+
+        if 0.0 < direction.length() {
+            transform.translation += MOVE_SPEED * direction.normalize();
+        }
+    }
 }
