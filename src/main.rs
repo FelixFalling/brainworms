@@ -34,17 +34,25 @@ fn move_player(
 ) {
     for mut transform in transforms.iter_mut() {
         let mut direction = Vec3::ZERO;
-        if keys.pressed(KeyCode::KeyW) {
+        if keys.pressed(KeyCode::KeyW) || keys.pressed(KeyCode::ArrowUp) {
+            //println!("Move up pressed");
             direction.y += 1.0;
         }
-        if keys.pressed(KeyCode::KeyA) {
+        if keys.pressed(KeyCode::KeyA) || keys.pressed(KeyCode::ArrowLeft) {
+            //println!("Move left pressed");
             direction.x -= 1.0;
         }
-        if keys.pressed(KeyCode::KeyS) {
+        if keys.pressed(KeyCode::KeyS) || keys.pressed(KeyCode::ArrowDown) {
+            //println!("Move down pressed");
             direction.y -= 1.0;
         }
-        if keys.pressed(KeyCode::KeyD) {
+        if keys.pressed(KeyCode::KeyD) || keys.pressed(KeyCode::ArrowRight) {
+            //println!("Move right pressed");
             direction.x += 1.0;
+        }
+
+        if keys.pressed(KeyCode::Space) {
+            direction.y += 1.0;
         }
 
         if 0.0 < direction.length() {
